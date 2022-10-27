@@ -7,7 +7,7 @@ Quickly open a Context (a group of apps) with just a single click.
 
 ### Setting Up
 1. Clone this repository into any directory (preferably one you can easily access)
-2. Edit meta/config.txt, replacing the APPDATA_PATH placeholder with your specific version. If needed, you can also replace MS_APPS_PATH, and set the OBSIDIAN flag to True or False depending on your needs.
+2. Edit meta/config.txt, replacing the APPDATA_PATH placeholder with your specific version. If needed, you can also replace MS_APPS_PATH and PWA_PATH, and set the OBSIDIAN flag to True or False depending on your needs.
 3. If any of your app's .exe files aren't in the APPDATA_PATH folder, then add their .exe path to meta/exceptions.txt. Take care to only capitalise the first letter of the filename, and make all others lowercase (this may be fixed in a later release). I've included Zotero as an example.
 
 ### Creating Contexts
