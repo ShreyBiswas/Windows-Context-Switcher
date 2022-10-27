@@ -45,12 +45,12 @@ def find_ms_file(file_name):
     return False
 
 
-def find_pwa_file(pwa_name):
-    # searches for a file in Google's specific folder, usually C:\Users\users\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Chrome Apps
+def find_app_shortcut(file_name):
+    # searches for a file in the user's Start Menu folder, usually C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs
 
-    for root, dirs, files in os.walk(config["PWA_PATH"]):
+    for root, dirs, files in os.walk(config["START_MENU_PATH"]):
         for file in files:
-            if file == f"{pwa_name}.lnk":
+            if file == f"{file_name}.lnk":
                 return os.path.join(root, file)
     return False
 
@@ -160,6 +160,8 @@ if __name__ == "__main__":
     ]  # will be handled separately rather than in find_files
     paths = []
 
+    FAILED = []  # tracks failed searches
+
     for app_name in unique:
         print(f"Finding {app_name}...")
 
@@ -171,19 +173,44 @@ if __name__ == "__main__":
         paths.append(path)
         print(f"Found {app_name}.")
 
-    for PWA in PWA_NAMES:
-        print(f"Finding {PWA}...")
-        path = find_pwa_file(PWA)
-        paths.append(path)
-        print("Found {PWA}.")
+    for app in set(APP_NAMES) - set(unique):
+        print(f"\nFinding {app}...")
+        if path := find_app_shortcut(f"{app}.exe"):
+            print(f"Found {app}.")
+            paths.append(path)
+        else:
+            print("Couldn't locate {app} shortcut. Adding to failed list.")
+            FAILED.append(app)
 
-    others = find_files(set(APP_NAMES) - set(unique))
+    for PWA in PWA_NAMES:
+        print(f"\nFinding {PWA}...")
+        if path := find_app_shortcut(f"{PWA}lnk"):
+            print(f"Found {PWA}.")
+            paths.append(path)
+        else:
+            print("Couldn't locate {PWA} shortcut. Adding to failed list.")
+            FAILED
+
+    print(f"\nCouldn't locate {', '.join(FAILED)}.")
+    print("Searching for .exe files...")
+
+    others = find_files(FAILED)
     if others[1]:  # if all apps were found
+        print(f"\nSuccessfully found all apps. Add these to meta/exceptions.txt for faster lookup in the future.\n{'\n '.join(others[0])}.")
         paths.extend(others[0])
     else:
-        print("FAILED TO FIND ADDITIONAL APPS")
+        print("\nFAILED TO FIND ALL ADDITIONAL APPS")
         print(f"Apps found: {others[0]}")
-        print("Please add files not listed above to exceptions.txt")
+        print(f"Apps not found: {set(FAILED) - set(others[0])}")
+        print("Please locate .exe files for the above apps, and add to meta/exceptions.txt")
+        # end program or continue based on y/n input
+        continue_ = input("Add just the successful apps or exit? (y|yes|continue/n|no|exit): ").lower()
+        if continue_ in ["y", "yes", "continue"]:
+            print(f"Continuing with {others[0]}")
+            paths.extend(others[0])
+        else:
+            print(f"Exiting. Please add the following to meta/exceptions.txt:\n{', '.join(set(FAILED) - set(others[0]))}")
+            exit()
 
     for path in paths:  # add command to start each app
         bat_contents += f'\nstart "" "{path}"'
