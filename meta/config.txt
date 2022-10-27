@@ -1,3 +1,4 @@
 OBSIDIAN=True
 APPDATA_PATH="C:\\Users\\user\\AppData\\Local\\"
 MS_APPS_PATH="C:\\Program Files\\Microsoft Office\\root\\Office16\\"
+PWA_PATH="C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Chrome Apps""
