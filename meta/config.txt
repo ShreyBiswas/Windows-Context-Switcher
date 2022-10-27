@@ -1,0 +1,3 @@
+OBSIDIAN=True
+APPDATA_PATH="C:\\Users\\user\\AppData\\Local\\"
+MS_APPS_PATH="C:\\Program Files\\Microsoft Office\\root\\Office16\\"
