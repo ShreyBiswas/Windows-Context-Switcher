@@ -50,7 +50,7 @@ def find_app_shortcut(file_name):
 
     for root, dirs, files in os.walk(config["START_MENU_PATH"]):
         for file in files:
-            if file == f"{file_name}.lnk":
+            if file.upper() == file_name.upper():
                 return os.path.join(root, file)
     return False
 
@@ -175,7 +175,7 @@ if __name__ == "__main__":
 
     for app in set(APP_NAMES) - set(unique):
         print("\nFinding " + app + "...")
-        if path := find_app_shortcut(f"{app}.exe"):
+        if path := find_app_shortcut(f"{app}.lnk"):
             print(f"Found {app}.")
             paths.append(path)
         else:
@@ -191,36 +191,37 @@ if __name__ == "__main__":
             print("Couldn't locate {PWA} shortcut. Adding to failed list.")
             FAILED
 
-    print()
-    print(f"Couldn't locate {', '.join(FAILED)}.")
-    print("Searching for .exe files...")
-
-    others = find_files(FAILED)
-    if others[1]:  # if all apps were found
+    if FAILED:
         print()
-        print(
-            "Successfully found all apps. Add these to meta/exceptions.txt for faster lookup in the future."
-        )
+        print(f"Couldn't locate {', '.join(FAILED)}.")
+        print("Searching for .exe files...")
 
-        print("\n ".join(others[0]))
-        paths.extend(others[0])
-    else:
-        print("\nFAILED TO FIND ALL ADDITIONAL APPS")
-        print(f"Apps found: {others[0]}")
-        print(f"Apps not found: {set(FAILED) - set(others[0])}")
-        print(
-            "Please locate .exe files for the above apps, and add to meta/exceptions.txt"
-        )
-        # end program or continue based on y/n input
-        continue_ = input(
-            "Add just the successful apps or exit? (y|yes|continue/n|no|exit): "
-        ).lower()
-        if continue_ in ["y", "yes", "continue"]:
-            print(f"Continuing with {others[0]}")
+        others = find_files(FAILED)
+        if others[1]:  # if all apps were found
+            print()
+            print(
+                "Successfully found all apps. Add these to meta/exceptions.txt for faster lookup in the future."
+            )
+
+            print("\n ".join(others[0]))
             paths.extend(others[0])
         else:
-            print("Exiting.")
-            exit()
+            print("\nFAILED TO FIND ALL ADDITIONAL APPS")
+            print(f"Apps found: {others[0]}")
+            print(f"Apps not found: {set(FAILED) - set(others[0])}")
+            print(
+                "Please locate .exe files for the above apps, and add to meta/exceptions.txt"
+            )
+            # end program or continue based on y/n input
+            continue_ = input(
+                "Add just the successful apps or exit? (y|yes|continue/n|no|exit): "
+            ).lower()
+            if continue_ in ["y", "yes", "continue"]:
+                print(f"Continuing with {others[0]}")
+                paths.extend(others[0])
+            else:
+                print("Exiting.")
+                exit()
 
     for path in paths:  # add command to start each app
         bat_contents += f'\nstart "" "{path}"'
@@ -236,3 +237,4 @@ if __name__ == "__main__":
     print("\nWriting to batch file...")
     write_to_file(CONTEXT_NAME, bat_contents)
     print("Done!")
+    input("Press Enter to exit.")
