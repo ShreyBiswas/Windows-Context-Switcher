@@ -174,7 +174,7 @@ if __name__ == "__main__":
         print(f"Found {app_name}.")
 
     for app in set(APP_NAMES) - set(unique):
-        print(f"\nFinding {app}...")
+        print("\nFinding "+app+"...")
         if path := find_app_shortcut(f"{app}.exe"):
             print(f"Found {app}.")
             paths.append(path)
@@ -183,7 +183,7 @@ if __name__ == "__main__":
             FAILED.append(app)
 
     for PWA in PWA_NAMES:
-        print(f"\nFinding {PWA}...")
+        print("\nFinding "+PWA+"...")
         if path := find_app_shortcut(f"{PWA}lnk"):
             print(f"Found {PWA}.")
             paths.append(path)
@@ -191,12 +191,14 @@ if __name__ == "__main__":
             print("Couldn't locate {PWA} shortcut. Adding to failed list.")
             FAILED
 
-    print(f"\nCouldn't locate {', '.join(FAILED)}.")
+    print()
+    print(f"Couldn't locate {', '.join(FAILED)}.")
     print("Searching for .exe files...")
 
     others = find_files(FAILED)
     if others[1]:  # if all apps were found
-        print(f"\nSuccessfully found all apps. Add these to meta/exceptions.txt for faster lookup in the future.\n{'\n '.join(others[0])}.")
+        print()
+        print(f"Successfully found all apps. Add these to meta/exceptions.txt for faster lookup in the future.\n{'\n '.join(others[0])}.")
         paths.extend(others[0])
     else:
         print("\nFAILED TO FIND ALL ADDITIONAL APPS")
