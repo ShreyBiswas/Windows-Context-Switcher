@@ -1,5 +1,5 @@
 Ms word,WINWORD.EXE
 Ms powerpoint,POWERPNT.EXE
 Ms excel,EXCEL.EXE
-Google chrome, chrome.exe
+Google chrome,chrome.exe
 Zotero,C:\Program Files (x86)\Zotero\zotero.exe
