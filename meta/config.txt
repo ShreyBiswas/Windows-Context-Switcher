@@ -1,5 +1,5 @@
 OBSIDIAN=True
-APPDATA_PATH="C:\\Users\\user\\AppData\\Local\\"
-START_MENU_PATH="C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\"
-MS_APPS_PATH="C:\\Program Files\\Microsoft Office\\root\\Office16\\"
+APPDATA_PATH=C:\\Users\\user\\AppData\\Local\\
+START_MENU_PATH=C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\
+MS_APPS_PATH=C:\\Program Files\\Microsoft Office\\root\\Office16\\
 
