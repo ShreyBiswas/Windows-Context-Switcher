@@ -184,7 +184,7 @@ if __name__ == "__main__":
 
     for PWA in PWA_NAMES:
         print("\nFinding " + PWA + "...")
-        if path := find_app_shortcut(f"{PWA}lnk"):
+        if path := find_app_shortcut(f"{PWA}.lnk"):
             print(f"Found {PWA}.")
             paths.append(path)
         else:
