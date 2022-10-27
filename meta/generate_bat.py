@@ -1,3 +1,4 @@
+from msilib.schema import Shortcut
 import os
 
 ### FILE HANDLING
@@ -22,10 +23,13 @@ exceptions = read_exceptions()
 config = read_config()
 
 
-def write_to_file(context, bat_contents):
-    # creates a batch file with the given context name
-    with open(f"..\\{context}.bat", "w") as file:
-        file.write(bat_contents)
+def write_to_file(context, bat_contents, debug=False):
+    if debug:
+        print(bat_contents)
+    else:
+        # creates a batch file with the given context name
+        with open(f"..\\{context}.bat", "w") as file:
+            file.write(bat_contents)
 
 
 ### FILE LOCATION
@@ -49,6 +53,13 @@ def find_app_shortcut(file_name):
     # searches for a file in the user's Start Menu folder, usually C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs
 
     for root, dirs, files in os.walk(config["START_MENU_PATH"]):
+        for file in files:
+            if file.upper() == file_name.upper():
+                return os.path.join(root, file)
+
+    # second search for .lnk files
+    # not sure why they're separated in two locations?
+    for root, dirs, files in os.walk(config["START_MENU_PATH2"]):
         for file in files:
             if file.upper() == file_name.upper():
                 return os.path.join(root, file)
@@ -134,70 +145,96 @@ def interface():  # just for convenience when generating .bat files
         APP_NAMES.append(app)
 
     print(
-        "\nEnter the websites (PWAs) you want to open in this context. Press enter after each one."
+        "\nEnter the websites you want to open in this context. Press enter after each one."
     )
     print("Hit Enter twice when you are done.")
-    PWA_NAMES = []
+    website_NAMES = []
     while True:
-        PWA = input()
-        if not PWA:
+        website = input()
+        if not website:
             break
-        PWA = PWA[0].upper() + PWA[1:].lower()
-        PWA_NAMES.append(PWA)
+        website = website[0].upper() + website[1:].lower()
+        website_NAMES.append(website)
 
     print("\nThank you! Generating batch file now...\n")
 
-    return CONTEXT_NAME, APP_NAMES, PWA_NAMES, OBSIDIAN_VAULT
+    return CONTEXT_NAME, APP_NAMES, website_NAMES, OBSIDIAN_VAULT
 
 
 if __name__ == "__main__":
-    CONTEXT_NAME, APP_NAMES, PWA_NAMES, OBSIDIAN_VAULT = interface()
+    CONTEXT_NAME, APP_NAMES, website_NAMES, OBSIDIAN_VAULT = interface()
+    debug = False
+
+    # debug mode
+    # CONTEXT_NAME, APP_NAMES, website_NAMES, OBSIDIAN_VAULT = (
+    #     "test",
+    #     ["Word", "Vscode", "Obsidian", "Figma"],
+    #     [],
+    #     "Thinking Out Loud",
+    # )
+    # debug = True
 
     bat_contents = "@echo off"  # stops the batch file from printing each command
 
-    unique = [
-        app for app in APP_NAMES if app.startswith("Ms ") or check_exception(app)
-    ]  # will be handled separately rather than in find_files
     paths = []
+    FAILED = []  # tracks failed searches for re-searching, or manual addition
 
-    FAILED = []  # tracks failed searches
-
-    for app_name in unique:
-        print(f"Finding {app_name}...")
-
-        if app_name.startswith("Ms "):
-            path = find_ms_file(exceptions[app_name])
-        else:
-            path = check_exception(app_name)
-
-        paths.append(path)
-        print(f"Found {app_name}.")
-
-    for app in set(APP_NAMES) - set(unique):
+    for app in APP_NAMES:
         print("\nFinding " + app + "...")
         if path := find_app_shortcut(f"{app}.lnk"):
             print(f"Found {app}.")
             paths.append(path)
         else:
-            print("Couldn't locate {app} shortcut. Adding to failed list.")
+            print(f"Couldn't locate {app} shortcut. Adding to failed list.")
             FAILED.append(app)
 
-    for PWA in PWA_NAMES:
-        print("\nFinding " + PWA + "...")
-        if path := find_app_shortcut(f"{PWA}.lnk"):
-            print(f"Found {PWA}.")
+    for website in website_NAMES:
+        print("\nFinding " + website + "...")
+        if path := find_app_shortcut(f"{website}.lnk"):
+            print(f"Found {website}.")
             paths.append(path)
         else:
-            print("Couldn't locate {PWA} shortcut. Adding to failed list.")
-            FAILED
+            print(f"Couldn't locate {website} shortcut. Adding to failed list.")
+            FAILED.append(website)
 
     if FAILED:
         print()
         print(f"Couldn't locate {', '.join(FAILED)}.")
         print("Searching for .exe files...")
 
-        others = find_files(FAILED)
-        if others[1]:  # if all apps were found
+        # TODO: Move the 'exception' check before the find_app_shortcut method, should speed up the process
+        unique = [
+            FAILED.pop(i)
+            for i in range(len(FAILED))
+            if FAILED[i].startswith("Ms ") or check_exception(FAILED[i])
+        ]  # if the app (FAILED[i]) is an MS app, or in exceptions.txt, it'll be handled separately
+
+        for app_name in unique:  # search for unique apps
+            if app_name.startswith("Ms "):
+                path = find_ms_file(exceptions[app_name])
+                if not path:
+                    FAILED.append(
+                        exceptions[app_name]
+                    )  # if MS Apps fail, try searching for their .exe files
+                    continue
+            else:
+                path = check_exception(app_name)
+
+            paths.append(path)
+
+        # if there are no .exe files to search for in FAILED, just use the unique list and assume it's been correctly found
+        others = (
+            find_files(FAILED)
+            if FAILED
+            else [
+                unique,
+                True,
+            ]
+        )
+
+        if others[
+            1
+        ]:  # if all apps were found, or there were no non-unique apps to find
             print()
             print(
                 "Successfully found all apps. Add these to meta/exceptions.txt for faster lookup in the future."
@@ -235,6 +272,6 @@ if __name__ == "__main__":
     bat_contents += "\nexit"  # close cmd window after opening all apps
 
     print("\nWriting to batch file...")
-    write_to_file(CONTEXT_NAME, bat_contents)
+    write_to_file(CONTEXT_NAME, bat_contents, debug=debug)
     print("Done!")
     input("Press Enter to exit.")
