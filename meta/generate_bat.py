@@ -134,7 +134,7 @@ def interface():  # just for convenience when generating .bat files
         APP_NAMES.append(app)
 
     print(
-        "\n Enter the websites (PWAs) you want to open in this context. Press enter after each one."
+        "\nEnter the websites (PWAs) you want to open in this context. Press enter after each one."
     )
     print("Hit Enter twice when you are done.")
     PWA_NAMES = []
@@ -174,7 +174,7 @@ if __name__ == "__main__":
         print(f"Found {app_name}.")
 
     for app in set(APP_NAMES) - set(unique):
-        print("\nFinding "+app+"...")
+        print("\nFinding " + app + "...")
         if path := find_app_shortcut(f"{app}.exe"):
             print(f"Found {app}.")
             paths.append(path)
@@ -183,7 +183,7 @@ if __name__ == "__main__":
             FAILED.append(app)
 
     for PWA in PWA_NAMES:
-        print("\nFinding "+PWA+"...")
+        print("\nFinding " + PWA + "...")
         if path := find_app_shortcut(f"{PWA}lnk"):
             print(f"Found {PWA}.")
             paths.append(path)
@@ -198,20 +198,28 @@ if __name__ == "__main__":
     others = find_files(FAILED)
     if others[1]:  # if all apps were found
         print()
-        print(f"Successfully found all apps. Add these to meta/exceptions.txt for faster lookup in the future.\n{'\n '.join(others[0])}.")
+        print(
+            "Successfully found all apps. Add these to meta/exceptions.txt for faster lookup in the future."
+        )
+
+        print("\n ".join(others[0]))
         paths.extend(others[0])
     else:
         print("\nFAILED TO FIND ALL ADDITIONAL APPS")
         print(f"Apps found: {others[0]}")
         print(f"Apps not found: {set(FAILED) - set(others[0])}")
-        print("Please locate .exe files for the above apps, and add to meta/exceptions.txt")
+        print(
+            "Please locate .exe files for the above apps, and add to meta/exceptions.txt"
+        )
         # end program or continue based on y/n input
-        continue_ = input("Add just the successful apps or exit? (y|yes|continue/n|no|exit): ").lower()
+        continue_ = input(
+            "Add just the successful apps or exit? (y|yes|continue/n|no|exit): "
+        ).lower()
         if continue_ in ["y", "yes", "continue"]:
             print(f"Continuing with {others[0]}")
             paths.extend(others[0])
         else:
-            print(f"Exiting. Please add the following to meta/exceptions.txt:\n{', '.join(set(FAILED) - set(others[0]))}")
+            print("Exiting.")
             exit()
 
     for path in paths:  # add command to start each app
