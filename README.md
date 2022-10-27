@@ -1,9 +1,8 @@
 # Windows Context Switcher
----
 
 Quickly open a Context (a group of apps) with just a single click.
 
-
+---
 ## Usage
 
 ### Setting Up
@@ -14,7 +13,10 @@ Quickly open a Context (a group of apps) with just a single click.
 ### Creating Contexts
 Run _generate_bat.bat (or generate_bat.py directly if you like) and follow the provided instructions. 
 
-#### Help! I can't find the name of my app!
+---
+## FAQ:
+
+### Help! I can't find the name of my app!
 If you can't automatically find the .exe file corresponding to the App Name, there may be a few issues.
 Firstly, the 'name' you provide to the program may be wrong. Usually, it's just the regular name of the app, but not always - more specifically, it's the app's .exe file, but with the '.exe' removed.
 An example of this is VSCode - it's launched with 'Code.exe', so the name you need to enter to the program is VSCode. If you don't want to remember this, just add it to meta/exceptions.txt, the same way Ms word,WINWORD.EXE is stored (i.e VSCode,Code.exe).
