@@ -1,1 +1,2 @@
-python meta/generate_bat.py
+cd meta
+python generate_bat.py
