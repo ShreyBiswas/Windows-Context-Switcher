@@ -45,6 +45,16 @@ def find_ms_file(file_name):
     return False
 
 
+def find_pwa_file(pwa_name):
+    # searches for a file in Google's specific folder, usually C:\Users\users\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Chrome Apps
+
+    for root, dirs, files in os.walk(config["PWA_PATH"]):
+        for file in files:
+            if file == f"{pwa_name}.lnk":
+                return os.path.join(root, file)
+    return False
+
+
 def find_files(file_names):
     # finds the paths for a series of files in the AppData folder, usually C:\\Users\\user\\AppData\\Local\\
     # returns a list of paths
@@ -98,6 +108,16 @@ def interface():  # just for convenience when generating .bat files
 
     CONTEXT_NAME = input("Context name: ").strip()
 
+    if config["OBSIDIAN"] == "True":
+        # Get the name of the Obsidian vault
+        print(
+            "\nEnter the name of the Obsidian vault you want to open in this context."
+        )
+        print("Hit Enter without any text if you do not want to open a vault.")
+        OBSIDIAN_VAULT = input().strip()
+    else:
+        OBSIDIAN_VAULT = False
+
     # Loop until the user enters an empty string (hits enter twice)
     print(
         "\nEnter the apps you want to open in this context. Press enter after each one."
@@ -113,23 +133,25 @@ def interface():  # just for convenience when generating .bat files
         app = app[0].upper() + app[1:].lower()
         APP_NAMES.append(app)
 
-    if config["OBSIDIAN"] == "True":
-        # Get the name of the Obsidian vault
-        print(
-            "\nEnter the name of the Obsidian vault you want to open in this context."
-        )
-        print("Hit Enter without any text if you do not want to open a vault.")
-        OBSIDIAN_VAULT = input().strip()
-    else:
-        OBSIDIAN_VAULT = False
+    print(
+        "\n Enter the websites (PWAs) you want to open in this context. Press enter after each one."
+    )
+    print("Hit Enter twice when you are done.")
+    PWA_NAMES = []
+    while True:
+        PWA = input()
+        if not PWA:
+            break
+        PWA = PWA[0].upper() + PWA[1:].lower()
+        PWA_NAMES.append(PWA)
 
     print("\nThank you! Generating batch file now...\n")
 
-    return CONTEXT_NAME, APP_NAMES, OBSIDIAN_VAULT
+    return CONTEXT_NAME, APP_NAMES, PWA_NAMES, OBSIDIAN_VAULT
 
 
 if __name__ == "__main__":
-    CONTEXT_NAME, APP_NAMES, OBSIDIAN_VAULT = interface()
+    CONTEXT_NAME, APP_NAMES, PWA_NAMES, OBSIDIAN_VAULT = interface()
 
     bat_contents = "@echo off"  # stops the batch file from printing each command
 
@@ -148,6 +170,12 @@ if __name__ == "__main__":
 
         paths.append(path)
         print(f"Found {app_name}.")
+
+    for PWA in PWA_NAMES:
+        print(f"Finding {PWA}...")
+        path = find_pwa_file(PWA)
+        paths.append(path)
+        print("Found {PWA}.")
 
     others = find_files(set(APP_NAMES) - set(unique))
     if others[1]:  # if all apps were found
